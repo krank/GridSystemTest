@@ -1,0 +1,96 @@
+Date : 2026-09-28 09:56:22
+Directory : c:\DEV\Csharp\GridSystem
+Total : 42 files,  4123 codes, 71 comments, 155 blanks, all 4349 lines
+
+Languages
++------------+------------+------------+------------+------------+------------+
+| language   | files      | code       | comment    | blank      | total      |
++------------+------------+------------+------------+------------+------------+
+| JSON       |         11 |      3,500 |          0 |          0 |      3,500 |
+| C#         |         19 |        478 |         71 |        140 |        689 |
+| XML        |          9 |         91 |          0 |         12 |        103 |
+| Properties |          3 |         54 |          0 |          3 |         57 |
++------------+------------+------------+------------+------------+------------+
+
+Directories
++------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                             | files      | code       | comment    | blank      | total      |
++------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                                |         42 |      4,123 |         71 |        155 |      4,349 |
+| GridSystem                                                                                                       |         18 |      2,151 |         49 |        103 |      2,303 |
+| GridSystem (Files)                                                                                               |          7 |        311 |         38 |         95 |        444 |
+| GridSystem\bin                                                                                                   |          3 |        131 |          0 |          0 |        131 |
+| GridSystem\bin\Debug                                                                                             |          3 |        131 |          0 |          0 |        131 |
+| GridSystem\bin\Debug\net11.0                                                                                     |          3 |        131 |          0 |          0 |        131 |
+| GridSystem\obj                                                                                                   |          8 |      1,709 |         11 |          8 |      1,728 |
+| GridSystem\obj (Files)                                                                                           |          4 |      1,671 |          0 |          0 |      1,671 |
+| GridSystem\obj\Debug                                                                                             |          4 |         38 |         11 |          8 |         57 |
+| GridSystem\obj\Debug\net11.0                                                                                     |          4 |         38 |         11 |          8 |         57 |
+| RaylibExt                                                                                                        |         11 |      1,082 |         11 |         30 |      1,123 |
+| RaylibExt (Files)                                                                                                |          2 |         94 |          0 |         22 |        116 |
+| RaylibExt\bin                                                                                                    |          1 |         80 |          0 |          0 |         80 |
+| RaylibExt\bin\Debug                                                                                              |          1 |         80 |          0 |          0 |         80 |
+| RaylibExt\bin\Debug\net11.0                                                                                      |          1 |         80 |          0 |          0 |         80 |
+| RaylibExt\obj                                                                                                    |          8 |        908 |         11 |          8 |        927 |
+| RaylibExt\obj (Files)                                                                                            |          4 |        870 |          0 |          0 |        870 |
+| RaylibExt\obj\Debug                                                                                              |          4 |         38 |         11 |          8 |         57 |
+| RaylibExt\obj\Debug\net11.0                                                                                      |          4 |         38 |         11 |          8 |         57 |
+| WeightedGraph                                                                                                    |         13 |        890 |         11 |         22 |        923 |
+| WeightedGraph (Files)                                                                                            |          4 |         45 |          0 |         14 |         59 |
+| WeightedGraph\bin                                                                                                |          1 |         23 |          0 |          0 |         23 |
+| WeightedGraph\bin\Debug                                                                                          |          1 |         23 |          0 |          0 |         23 |
+| WeightedGraph\bin\Debug\net11.0                                                                                  |          1 |         23 |          0 |          0 |         23 |
+| WeightedGraph\obj                                                                                                |          8 |        822 |         11 |          8 |        841 |
+| WeightedGraph\obj (Files)                                                                                        |          4 |        784 |          0 |          0 |        784 |
+| WeightedGraph\obj\Debug                                                                                          |          4 |         38 |         11 |          8 |         57 |
+| WeightedGraph\obj\Debug\net11.0                                                                                  |          4 |         38 |         11 |          8 |         57 |
++------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| filename                                                                                                         | language   | code       | comment    | blank      | total      |
++------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| c:\DEV\Csharp\GridSystem\GridSystem\Direction.cs                                                                 | C#         |          5 |          0 |          2 |          7 |
+| c:\DEV\Csharp\GridSystem\GridSystem\Grid.cs                                                                      | C#         |         87 |         13 |         20 |        120 |
+| c:\DEV\Csharp\GridSystem\GridSystem\GridRendererRaylib.cs                                                        | C#         |        136 |          2 |         37 |        175 |
+| c:\DEV\Csharp\GridSystem\GridSystem\GridSystem.csproj                                                            | XML        |         15 |          0 |          5 |         20 |
+| c:\DEV\Csharp\GridSystem\GridSystem\GridTile.cs                                                                  | C#         |         14 |          0 |          2 |         16 |
+| c:\DEV\Csharp\GridSystem\GridSystem\IGridRenderer.cs                                                             | C#         |          7 |          0 |          3 |         10 |
+| c:\DEV\Csharp\GridSystem\GridSystem\Program.cs                                                                   | C#         |         47 |         23 |         26 |         96 |
+| c:\DEV\Csharp\GridSystem\GridSystem\bin\Debug\net11.0\GridSystem.deps.json                                       | JSON       |        111 |          0 |          0 |        111 |
+| c:\DEV\Csharp\GridSystem\GridSystem\bin\Debug\net11.0\GridSystem.runtimeconfig.dev.json                          | JSON       |          8 |          0 |          0 |          8 |
+| c:\DEV\Csharp\GridSystem\GridSystem\bin\Debug\net11.0\GridSystem.runtimeconfig.json                              | JSON       |         12 |          0 |          0 |         12 |
+| c:\DEV\Csharp\GridSystem\GridSystem\obj\Debug\net11.0\.NETCoreApp,Version=v11.0.AssemblyAttributes.cs            | C#         |          3 |          1 |          1 |          5 |
+| c:\DEV\Csharp\GridSystem\GridSystem\obj\Debug\net11.0\GridSystem.AssemblyInfo.cs                                 | C#         |          9 |          9 |          5 |         23 |
+| c:\DEV\Csharp\GridSystem\GridSystem\obj\Debug\net11.0\GridSystem.GeneratedMSBuildEditorConfig.editorconfig       | Properties |         18 |          0 |          1 |         19 |
+| c:\DEV\Csharp\GridSystem\GridSystem\obj\Debug\net11.0\GridSystem.GlobalUsings.g.cs                               | C#         |          8 |          1 |          1 |         10 |
+| c:\DEV\Csharp\GridSystem\GridSystem\obj\GridSystem.csproj.nuget.dgspec.json                                      | JSON       |      1,146 |          0 |          0 |      1,146 |
+| c:\DEV\Csharp\GridSystem\GridSystem\obj\GridSystem.csproj.nuget.g.props                                          | XML        |         15 |          0 |          0 |         15 |
+| c:\DEV\Csharp\GridSystem\GridSystem\obj\GridSystem.csproj.nuget.g.targets                                        | XML        |          6 |          0 |          0 |          6 |
+| c:\DEV\Csharp\GridSystem\GridSystem\obj\project.assets.json                                                      | JSON       |        504 |          0 |          0 |        504 |
+| c:\DEV\Csharp\GridSystem\RaylibExt\Lines.cs                                                                      | C#         |         84 |          0 |         18 |        102 |
+| c:\DEV\Csharp\GridSystem\RaylibExt\RaylibExt.csproj                                                              | XML        |         10 |          0 |          4 |         14 |
+| c:\DEV\Csharp\GridSystem\RaylibExt\bin\Debug\net11.0\RaylibExt.deps.json                                         | JSON       |         80 |          0 |          0 |         80 |
+| c:\DEV\Csharp\GridSystem\RaylibExt\obj\Debug\net11.0\.NETCoreApp,Version=v11.0.AssemblyAttributes.cs             | C#         |          3 |          1 |          1 |          5 |
+| c:\DEV\Csharp\GridSystem\RaylibExt\obj\Debug\net11.0\RaylibExt.AssemblyInfo.cs                                   | C#         |          9 |          9 |          5 |         23 |
+| c:\DEV\Csharp\GridSystem\RaylibExt\obj\Debug\net11.0\RaylibExt.GeneratedMSBuildEditorConfig.editorconfig         | Properties |         18 |          0 |          1 |         19 |
+| c:\DEV\Csharp\GridSystem\RaylibExt\obj\Debug\net11.0\RaylibExt.GlobalUsings.g.cs                                 | C#         |          8 |          1 |          1 |         10 |
+| c:\DEV\Csharp\GridSystem\RaylibExt\obj\RaylibExt.csproj.nuget.dgspec.json                                        | JSON       |        387 |          0 |          0 |        387 |
+| c:\DEV\Csharp\GridSystem\RaylibExt\obj\RaylibExt.csproj.nuget.g.props                                            | XML        |         15 |          0 |          0 |         15 |
+| c:\DEV\Csharp\GridSystem\RaylibExt\obj\RaylibExt.csproj.nuget.g.targets                                          | XML        |          6 |          0 |          0 |          6 |
+| c:\DEV\Csharp\GridSystem\RaylibExt\obj\project.assets.json                                                       | JSON       |        462 |          0 |          0 |        462 |
+| c:\DEV\Csharp\GridSystem\WeightedGraph\Vertex.cs                                                                 | C#         |         13 |          0 |          4 |         17 |
+| c:\DEV\Csharp\GridSystem\WeightedGraph\WeightedEdge.cs                                                           | C#         |          7 |          0 |          2 |          9 |
+| c:\DEV\Csharp\GridSystem\WeightedGraph\WeightedGraph.cs                                                          | C#         |         18 |          0 |          5 |         23 |
+| c:\DEV\Csharp\GridSystem\WeightedGraph\WeightedGraph.csproj                                                      | XML        |          7 |          0 |          3 |         10 |
+| c:\DEV\Csharp\GridSystem\WeightedGraph\bin\Debug\net11.0\WeightedGraph.deps.json                                 | JSON       |         23 |          0 |          0 |         23 |
+| c:\DEV\Csharp\GridSystem\WeightedGraph\obj\Debug\net11.0\.NETCoreApp,Version=v11.0.AssemblyAttributes.cs         | C#         |          3 |          1 |          1 |          5 |
+| c:\DEV\Csharp\GridSystem\WeightedGraph\obj\Debug\net11.0\WeightedGraph.AssemblyInfo.cs                           | C#         |          9 |          9 |          5 |         23 |
+| c:\DEV\Csharp\GridSystem\WeightedGraph\obj\Debug\net11.0\WeightedGraph.GeneratedMSBuildEditorConfig.editorconfig | Properties |         18 |          0 |          1 |         19 |
+| c:\DEV\Csharp\GridSystem\WeightedGraph\obj\Debug\net11.0\WeightedGraph.GlobalUsings.g.cs                         | C#         |          8 |          1 |          1 |         10 |
+| c:\DEV\Csharp\GridSystem\WeightedGraph\obj\WeightedGraph.csproj.nuget.dgspec.json                                | JSON       |        381 |          0 |          0 |        381 |
+| c:\DEV\Csharp\GridSystem\WeightedGraph\obj\WeightedGraph.csproj.nuget.g.props                                    | XML        |         15 |          0 |          0 |         15 |
+| c:\DEV\Csharp\GridSystem\WeightedGraph\obj\WeightedGraph.csproj.nuget.g.targets                                  | XML        |          2 |          0 |          0 |          2 |
+| c:\DEV\Csharp\GridSystem\WeightedGraph\obj\project.assets.json                                                   | JSON       |        386 |          0 |          0 |        386 |
+| Total                                                                                                            |            |      4,123 |         71 |        155 |      4,349 |
++------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
