@@ -1,11 +1,8 @@
 ﻿using System.Numerics;
-using System.Text.Json;
 using GridSystem;
 using Raylib_cs;
 using RaylibExt;
 using WeightedGraph;
-
-
 
 
 // WeightedGraph<string> graph = new();
@@ -36,8 +33,10 @@ Grid grid = new(5, 5);
 grid.GetAllCoords();
 
 grid.Get(1, 1).Blocking[(int)Direction.North] = true;
-// grid.Get(1, 1).Blocking[(int)Direction.West] = true;
-grid.Get(0, 1).Blocking[(int)Direction.East] = true;
+grid.Get(1, 1).Blocking[(int)Direction.East] = true;
+
+grid.Get(3, 3).Blocking[(int)Direction.West] = true;
+grid.Get(3, 3).Blocking[(int)Direction.East] = true;
 
 WeightedGraph<GridTile> graph = grid.GetGraph();
 List<WeightedEdge<GridTile>> edges = graph.GetAllEdges();
@@ -78,11 +77,17 @@ while (!Raylib.WindowShouldClose())
     ]);
 
     Vector2 direction = Vector2.Normalize(coords[1] - coords[0]);
-    
+
     Lines.DrawArrow(
       [coords[0] + direction * 16f,
       coords[1] + -direction * 16f],
-      5, Color.Blue
+      3, Color.Blue, legLength: 10
+    );
+
+    Lines.DrawLineLabeled(
+      coords[0] + direction * 16f,
+      coords[1] + -direction * 16f,
+      0, Color.Blue, "" + edge.Weight, Raylib.GetFontDefault().BaseSize
     );
   }
 

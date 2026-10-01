@@ -13,4 +13,15 @@ public class GridTile(
   public int Level { get; set; } = level;
 
   public bool[] Blocking { get; set; } = [blockN, blockE, blockS, blockW];
+
+  public override string ToString()
+  {
+    return $"Tile at [x:{X} y:{Y}], " +
+      "walls [" +
+        $"{(Blocking[(int)Direction.North] ? "N" : "")}" +
+        $"{(Blocking[(int)Direction.East] ? "E" : "")}" +
+        $"{(Blocking[(int)Direction.South] ? "S" : "")}" +
+        $"{(Blocking[(int)Direction.West] ? "W" : "")}" +
+      "]";
+  }
 }
