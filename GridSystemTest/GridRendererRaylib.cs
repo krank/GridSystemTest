@@ -2,7 +2,7 @@ using System.Numerics;
 using GridSystem;
 using Raylib_cs;
 
-public class GridRendererRaylib : IGridRenderer
+public class GridRendererRaylib
 {
   public class GridTheme
   {
@@ -35,6 +35,8 @@ public class GridRendererRaylib : IGridRenderer
   {
     _grid = grid;
   }
+
+  // -- TILE DRAWING
 
   public void DrawTile(GridTile tile) => DrawTile(tile, defaultTheme);
   public void DrawTile(GridTile tile, string text) => DrawTile(tile, defaultTheme, text);
@@ -95,11 +97,7 @@ public class GridRendererRaylib : IGridRenderer
     }
   }
 
-  public Vector2 GetPxSize() => new(
-      _grid.Width * (GridTileSize + GridSpacingPx),
-      _grid.Height * (GridTileSize + GridSpacingPx)
-    );
-
+  // -- GRID DRAWING
   public void DrawGrid() => DrawGrid([], defaultTheme);
   public void DrawGrid(GridTheme theme) => DrawGrid([], theme);
   public void DrawGrid(List<(int, int)> includedCoords) => DrawGrid(includedCoords, defaultTheme);
@@ -127,7 +125,44 @@ public class GridRendererRaylib : IGridRenderer
     }
   }
 
-  public Vector2[] GetTileCenterCoords((int, int)[] coords)
+  // -- PATHS AND LINE DRAWING
+
+  //TODO: Draw line (Array of grid coords, arrow at the end yes/no, distance from tile center)
+  //TODO: Draw line (Array of tile coords, arrow at the end yes/no, distance from tile center, text)
+  //TODO: Draw line (Array of tile coords, Action<x, y>)
+
+
+  public void DrawLine((int x, int y)[] coords, Color color, int thickness, float distanceFromCenter = 10)
+  {
+    Vector2[] pxCoords = GetTileCenterPxCoords(coords);
+
+    for (int i = 0; i < pxCoords.Length - 1; i++)
+    {
+      Vector2 direction = Vector2.Normalize(pxCoords[i + 1] - pxCoords[i]);
+      Vector2 start = pxCoords[i] + direction * distanceFromCenter;
+      Vector2 end = pxCoords[i + 1] - direction * distanceFromCenter;
+
+      Raylib.DrawLineEx(start, end, thickness, color);
+    }
+  }
+  public void DrawLine((int x, int y)[] coords, Color color, int thickness, Action<Vector2, Vector2, float, Color> drawAction, float distanceFromCenter = 10)
+  {
+    Vector2[] pxCoords = GetTileCenterPxCoords(coords);
+
+    for (int i = 0; i < pxCoords.Length - 1; i++)
+    {
+      Vector2 direction = Vector2.Normalize(pxCoords[i + 1] - pxCoords[i]);
+      Vector2 start = pxCoords[i] + direction * distanceFromCenter;
+      Vector2 end = pxCoords[i + 1] - direction * distanceFromCenter;
+
+      drawAction(start, end, thickness, color);
+
+      // Raylib.DrawLineEx(start, end, thickness, color);
+    }
+  }
+
+  // -- COORDINATE MANAGEMENT
+  public Vector2[] GetTileCenterPxCoords((int, int)[] coords)
   {
     Vector2[] pxCoords = new Vector2[coords.Length];
     Vector2 halfSizeOffset = Vector2.One * GridTileSize / 2;
@@ -145,9 +180,9 @@ public class GridRendererRaylib : IGridRenderer
     return pxCoords;
   }
 
-  public Vector2 GetTileCenterCoords((int, int) coord) => GetTileCenterCoords([coord])[0];
+  public Vector2 GetTileCenterPxCoords((int, int) coord) => GetTileCenterPxCoords([coord])[0];
 
-  public Vector2[] GetTileCenterCoords() => GetTileCenterCoords(_grid.GetAllCoords());
+  public Vector2[] GetTileCenterPxCoords() => GetTileCenterPxCoords(_grid.GetAllCoords());
 
   public (int x, int y) GetCoordFromScreenPoint(Vector2 pos)
   {
@@ -171,5 +206,27 @@ public class GridRendererRaylib : IGridRenderer
     if (coord.x < 0 || coord.y < 0) return null;
 
     return _grid.Get(coord.x, coord.y);
+  }
+
+  // -- UTIL
+
+  public Vector2 GetPxSize() => new(
+    _grid.Width * (GridTileSize + GridSpacingPx),
+    _grid.Height * (GridTileSize + GridSpacingPx)
+  );
+
+  // -- CHANGE VISUALS
+
+  public void FitToScreen()
+  {
+    GridTileSize = Math.Min(
+      Raylib.GetScreenHeight() / (_grid.Height * GridSpacing + _grid.Height),
+      Raylib.GetScreenWidth() / (_grid.Width * GridSpacing + _grid.Width)
+    );
+  }
+
+  public void CenterOnScreen()
+  {
+    GridOffset = Raylib.GetScreenCenter() - GetPxSize() / 2;
   }
 }

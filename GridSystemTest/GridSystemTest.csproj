@@ -12,8 +12,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RaylibExt\RaylibExt.csproj" />
-    <ProjectReference Include="..\WeightedGraph\WeightedGraph.csproj" />
+    <ProjectReference Include="..\..\Libraries\GridSystem\GridSystem.csproj" />
+    <ProjectReference Include="..\..\Libraries\RaylibExt\RaylibExt.csproj" />
+    <ProjectReference Include="..\..\Libraries\WeightedGraph\WeightedGraph.csproj" />
   </ItemGroup>
 
 </Project>

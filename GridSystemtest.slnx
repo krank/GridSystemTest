@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="../Libraries/GridSystem/GridSystem.csproj" />
+  <Project Path="../Libraries/RaylibExt/RaylibExt.csproj" />
+  <Project Path="../Libraries/WeightedGraph/WeightedGraph.csproj" />
+  <Project Path="GridSystemTest/GridSystemTest.csproj" />
+</Solution>
