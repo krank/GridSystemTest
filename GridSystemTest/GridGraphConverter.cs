@@ -37,9 +37,10 @@ public class GridGraphConverter
           int targetIndex = (tile.Y + offset.y) * grid.Width + tile.X + offset.x;
           Vertex<GridTile> targetVertex = graph.Vertices[targetIndex];
 
+          // TODO: Extract cost calculation to its own module
           int cost = offset.x == 0 || offset.y == 0 ? grid.CostStraight : grid.CostDiagonal;
+          // TODO: We should be able to make this both ways at the same time, to save some iterations
           graph.AddEdge(thisVertex, targetVertex, cost);
-
         }
       }
     }
