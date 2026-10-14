@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Libraries\GridSystem\GridSystem.csproj" />
+    <ProjectReference Include="..\..\Libraries\RaylibExt\RaylibExt.csproj" />
+    <ProjectReference Include="..\CoordinateTransformers\CoordinateTransformers.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

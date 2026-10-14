@@ -163,8 +163,6 @@ public class GridRendererRaylib
       Vector2 end = pxCoords[i + 1] - direction * distanceFromCenter;
 
       drawAction(start, end, thickness, color);
-
-      // Raylib.DrawLineEx(start, end, thickness, color);
     }
   }
 
