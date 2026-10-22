@@ -20,7 +20,7 @@ public class LevelEditor
 
   private Grid _grid;
   private WeightedGraph<GridTile> _graph;
-  public IsoGridRendererRaylib Gd { get; private set; }
+  public GridRendererRaylib Gd { get; private set; }
 
   private bool displayGraph = false;
 
@@ -34,20 +34,20 @@ public class LevelEditor
 
   public HashSet<GridTile> SelectedTiles { get; } = [];
 
-  public IsoGridRendererRaylib.GridTheme ThemeHovered { get; private set; } = new()
+  public GridRendererRaylib.GridTheme ThemeHovered { get; private set; } = new()
   {
     Background = Color.Blank,
     Wall = Color.Blank,
     Tile = new(0, 0, 255, 16)
   };
-  public IsoGridRendererRaylib.GridTheme ThemeMarked { get; private set; } = new()
+  public GridRendererRaylib.GridTheme ThemeMarked { get; private set; } = new()
   {
     Background = Color.Blank,
     Wall = Color.Blank,
     Tile = new(255, 0, 0, 100)
   };
 
-  public LevelEditor(Grid grid, IsoGridRendererRaylib gd)
+  public LevelEditor(Grid grid, GridRendererRaylib gd)
   {
     _grid = grid;
     _graph = GridGraphConverter.ConvertGridToGraph(_grid);

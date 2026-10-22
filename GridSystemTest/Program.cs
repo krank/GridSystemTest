@@ -34,7 +34,7 @@ Problems for Future-me
 */
 
 
-// TODO: Caching of all the various calculated points...
+// TODO: Caching of all the various calculated points...?
 
 
 Vector2[] test = [
@@ -61,10 +61,9 @@ Camera2D camera = new()
 };
 
 
-IsoGridRendererRaylib gd = new(grid) { GridTileSize = 64, GridSpacing = .25f };
+GridRendererRaylib gd = new(grid) { GridTileSize = 64, GridSpacing = .25f };
 
 gd.Transformer = new IsoTransform() { Ratio = .5f };
-// gd.Transformer = new DummyTransformer();
 
 // gd.FitToScreen(); // TODO: Find rectangle of a list of points
 gd.CenterOnScreen();

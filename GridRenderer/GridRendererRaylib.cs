@@ -3,10 +3,12 @@ using GridSystem;
 using Raylib_cs;
 using RaylibExt;
 using CoordinateTransformers;
+using System.Diagnostics;
 
 namespace GridRenderer;
 
-public class IsoGridRendererRaylib
+// TODO: Extract all the Raylib/RaylibExt stuff
+public class GridRendererRaylib
 {
   public Grid Grid { get; set; }
   public float GridTileSize { get; set; } = 32;
@@ -45,10 +47,10 @@ public class IsoGridRendererRaylib
   public GridTheme DefaultTheme { get; set; } = new();
 
   // -- Coordinate transformers
-  public CoordinateTransform Transformer { get; set; } = new IsoTransform() { Ratio = .5f };
+  public CoordinateTransform Transformer { get; set; } = new DummyTransformer();
   public OffsetTransform OffsetTransformer { get; set; } = new OffsetTransform();
 
-  public IsoGridRendererRaylib(Grid grid)
+  public GridRendererRaylib(Grid grid)
   {
     Grid = grid;
     WallThickness = _wallThickness;
@@ -123,7 +125,7 @@ public class IsoGridRendererRaylib
 
   public void DrawGrid(List<(int, int)> includedCoords, GridTheme theme)
   {
-    // This setup feels like it shouldn't need to be done each frame
+    // TODO: This setup feels like it shouldn't need to be done each frame
     // Just each time WallSpacingPx is recalculated
     _innerRectCornerOffsets = [
         new Vector2(WallThicknessPx),
@@ -134,17 +136,7 @@ public class IsoGridRendererRaylib
 
     _innerRectCornerOffsets = Transformer.Apply(_innerRectCornerOffsets);
 
-    Vector2 size = GetPxSize();
-
-    Vector2[] corners = [ // clockwise
-      Vector2.Zero,
-      new(size.X, 0),
-      new(size.X, size.Y),
-      new(0, size.Y)
-    ];
-
-    corners = Transformer.Apply(corners);
-    corners = OffsetTransformer.Apply(corners);
+    Vector2[] corners = GetCorners();
 
     Raylib.DrawTriangleFan([.. corners.Reverse()], 4, theme.Background);
 
@@ -158,6 +150,22 @@ public class IsoGridRendererRaylib
         if (tile != null) DrawTile(tile, theme);
       }
     }
+  }
+
+  private Vector2[] GetCorners()
+  {
+    Vector2 size = GetPxSize();
+
+    Vector2[] corners = [ // clockwise
+      Vector2.Zero,
+      new(size.X, 0),
+      new(size.X, size.Y),
+      new(0, size.Y)
+    ];
+
+    corners = Transformer.Apply(corners);
+    corners = OffsetTransformer.Apply(corners);
+    return corners;
   }
 
   // -- PATHS AND LINE DRAWING
@@ -288,6 +296,15 @@ public class IsoGridRendererRaylib
 
   public void CenterOnScreen()
   {
+    Vector2 centerpoint = Raylib.GetScreenCenter();
+
+    Vector2[] corners = GetCorners();
+
+    Rectangle r = Rect.GetRectangleFromPoints(corners);
+
+    Vector2 diff = centerpoint - r.Center;
+    Debug.Print($"{diff}");
+
     OffsetTransformer.Offset = Raylib.GetScreenCenter();
   }
 
