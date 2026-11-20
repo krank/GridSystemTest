@@ -2,7 +2,7 @@ using System.Numerics;
 using GridSystem;
 using Raylib_cs;
 
-namespace GridSystemTest.LevelEditor;
+namespace GridLevelEditor;
 
 public class LevelEditorWallState(LevelEditor levelEditor) : LevelEditorState(levelEditor, "Wall edit")
 {
@@ -34,18 +34,17 @@ public class LevelEditorWallState(LevelEditor levelEditor) : LevelEditorState(le
   {
     if (_levelEditor.HoveredTile == null) return;
     _hoveredTileCorners = _levelEditor.Gd.GetTileCorners(_levelEditor.HoveredTile);
-    _hoveredTileCorners = _levelEditor.Gd.Transformer.Apply(_hoveredTileCorners);
-    _hoveredTileCorners = _levelEditor.Gd.OffsetTransformer.Apply(_hoveredTileCorners);
+
+    _hoveredTileCorners = _levelEditor.Gd.ApplyTransformers(_hoveredTileCorners, _levelEditor.HoveredTile.GridLevel.LevelNum);
 
     if (_hoveredTileCorners != null)
     {
-      Vector2 mPos = _levelEditor.Gd.OffsetTransformer.Reverse(_levelEditor.MousePosition);
-      mPos = _levelEditor.Gd.Transformer.Reverse(mPos);
+      Vector2 mPos = _levelEditor.Gd.ReverseTransformers(_levelEditor.MousePosition, _levelEditor.HoveredTile.GridLevel.LevelNum);
 
       // TODO: For the love of god clean this up
       _localDirection = _levelEditor.Gd.GetLocalTileDirectionOfScreenPoint(
         _levelEditor.Gd.GetTileCenterPxCoords(
-          (_levelEditor.HoveredTile.X, _levelEditor.HoveredTile.Y)
+          (_levelEditor.HoveredTile.X, _levelEditor.HoveredTile.Y, 0)
         ),
         mPos
       );

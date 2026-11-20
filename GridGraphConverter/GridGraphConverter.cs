@@ -1,10 +1,11 @@
 using WeightedGraph;
 using GridSystem;
+namespace GridGraphConverter;
 
 public class GridGraphConverter
 {
   //TODO: Optimize
-  public static WeightedGraph<GridTile> ConvertGridToGraph(Grid grid)
+  public static WeightedGraph<GridTile> ConvertGridToGraph(GridLevel grid)
   {
     WeightedGraph<GridTile> graph = new();
 
@@ -28,7 +29,7 @@ public class GridGraphConverter
         int thisIndex = tile.Y * grid.Width + tile.X;
         Vertex<GridTile> thisVertex = graph.Vertices[thisIndex];
 
-        foreach ((int x, int y) offset in Grid.Offsets)
+        foreach ((int x, int y) offset in GridLevel.Offsets)
         {
           // Make sure there's no blocking walls
           if (grid.IsBlockedInDirection(tile, offset)) continue;

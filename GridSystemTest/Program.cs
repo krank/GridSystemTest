@@ -1,9 +1,9 @@
 ﻿using System.Numerics;
 using GridSystem;
-using GridSystemTest.LevelEditor;
 using CoordinateTransformers;
 using Raylib_cs;
 using GridRenderer;
+using GridLevelEditor;
 
 
 
@@ -16,11 +16,7 @@ Renderer
  - Completely separate out the Raylib stuff into a RaylibAdapter (that can be switched out)
  - Rendering Graph connections between levels
 
-Editor
- - Allow deletion (nulling)
-
 Grid
- - Multiple levels
  - Graphing connections between levels 
    (Add Actor interface, where Actor decides if it's able to climb a certain height.
     Evaluate(Vertex from, Vertex to) -> Actor does type checking and checks heights etc
@@ -36,14 +32,6 @@ Problems for Future-me
 
 // TODO: Caching of all the various calculated points...?
 
-
-Vector2[] test = [
-  new(200,200),
-  new(200,100),
-  new(100,200),
-  new(100,100),
-];
-
 int screenWidth = 1024;
 int screenHeight = 768;
 float cameraSpeed = 150;
@@ -51,7 +39,7 @@ float cameraSpeed = 150;
 Raylib.InitWindow(screenWidth, screenHeight, "Title");
 Raylib.SetTargetFPS(60);
 
-Grid grid = new(5, 6);
+Grid grid = new(5, 6, 5);
 
 Camera2D camera = new()
 {
@@ -61,23 +49,40 @@ Camera2D camera = new()
 };
 
 
-GridRendererRaylib gd = new(grid) { GridTileSize = 64, GridSpacing = .25f };
+GridRendererRaylib gd = new(grid)
+{
+  GridTileSize = 64,
+  GridSpacing = .05f,
+  Transformer = new IsoTransform() { Ratio = .5f }
+};
 
-gd.Transformer = new IsoTransform() { Ratio = .5f };
-
-// gd.FitToScreen(); // TODO: Find rectangle of a list of points
 gd.CenterOnScreen();
+gd.Recalculate();
 
-LevelEditor levelEditor = new(grid, gd);
+((OffsetTransform)gd.LevelOffsetTransformer).Offset = new(0, -96);
+
+LevelEditor levelEditor = new(grid.Levels[0], gd);
+
+Color bkg = Color.White;
 
 while (!Raylib.WindowShouldClose())
 {
   float deltaTime = Raylib.GetFrameTime();
 
+  // TODO: Refactor into actions?
   if (Raylib.IsKeyDown(KeyboardKey.Right)) camera.Offset.X -= cameraSpeed * deltaTime;
   if (Raylib.IsKeyDown(KeyboardKey.Left)) camera.Offset.X += cameraSpeed * deltaTime;
   if (Raylib.IsKeyDown(KeyboardKey.Up)) camera.Offset.Y += cameraSpeed * deltaTime;
   if (Raylib.IsKeyDown(KeyboardKey.Down)) camera.Offset.Y -= cameraSpeed * deltaTime;
+
+  if (Raylib.GetMouseWheelMove() > 0) gd.LevelsToDisplay++;
+  if (Raylib.GetMouseWheelMove() < 0) gd.LevelsToDisplay--;
+
+  if (Raylib.IsMouseButtonDown(MouseButton.Middle))
+  {
+    Vector2 mDelta = Raylib.GetMouseDelta();
+    camera.Offset += mDelta;
+  }
 
   Vector2 mPos = Raylib.GetScreenToWorld2D(Raylib.GetMousePosition(), camera);
 
@@ -89,13 +94,12 @@ while (!Raylib.WindowShouldClose())
   // -- DRAWING
 
   Raylib.BeginDrawing();
-  Raylib.ClearBackground(Color.White);
+  Raylib.ClearBackground(bkg);
 
   Raylib.BeginMode2D(camera);
   gd.DrawGrid();
 
   levelEditor.Draw();
-
 
   Raylib.EndMode2D();
   levelEditor.DrawUI();

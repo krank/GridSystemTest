@@ -2,7 +2,7 @@ using System.Numerics;
 
 namespace CoordinateTransformers;
 
-public class DummyTransformer : CoordinateTransform
+public class DummyTransformer : ICoordinateTransform
 {
   public Vector2 Apply(Vector2 original) => original;
   public Vector2[] Apply(Vector2[] originals) => [.. originals];

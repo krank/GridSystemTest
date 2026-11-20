@@ -16,6 +16,7 @@
     <ProjectReference Include="..\..\Libraries\RaylibExt\RaylibExt.csproj" />
     <ProjectReference Include="..\..\Libraries\WeightedGraph\WeightedGraph.csproj" />
     <ProjectReference Include="..\GridRenderer\GridRenderer.csproj" />
+    <ProjectReference Include="..\GridLevelEditor\GridLevelEditor.csproj" />
   </ItemGroup>
 
 </Project>

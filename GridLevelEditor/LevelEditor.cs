@@ -6,8 +6,9 @@ using System.Text.Json;
 using System.Diagnostics;
 using RaylibExt;
 using GridRenderer;
+using GGC = GridGraphConverter;
 
-namespace GridSystemTest.LevelEditor;
+namespace GridLevelEditor;
 
 public class LevelEditor
 {
@@ -18,7 +19,7 @@ public class LevelEditor
 
   public bool Dirty { get; set; } = false;
 
-  private Grid _grid;
+  private GridLevel _grid;
   private WeightedGraph<GridTile> _graph;
   public GridRendererRaylib Gd { get; private set; }
 
@@ -47,10 +48,10 @@ public class LevelEditor
     Tile = new(255, 0, 0, 100)
   };
 
-  public LevelEditor(Grid grid, GridRendererRaylib gd)
+  public LevelEditor(GridLevel grid, GridRendererRaylib gd)
   {
     _grid = grid;
-    _graph = GridGraphConverter.ConvertGridToGraph(_grid);
+    _graph = GGC.GridGraphConverter.ConvertGridToGraph(_grid);
     Gd = gd;
 
     _states = new()
@@ -59,7 +60,7 @@ public class LevelEditor
       {State.Tiles, new LevelEditorTilesState(this)}
     };
 
-    _state = _states[State.Walls];
+    _state = _states[State.Tiles];
   }
 
   public void Update(Vector2 mPos)
@@ -76,6 +77,8 @@ public class LevelEditor
       Raylib.IsMouseButtonPressed(MouseButton.Right)
     );
 
+    _state.HandleKeys();
+
     if (Raylib.IsKeyDown(KeyboardKey.LeftControl))
     {
       if (Raylib.IsKeyPressed(KeyboardKey.S)) SaveToFile();
@@ -87,17 +90,17 @@ public class LevelEditor
 
     if (Raylib.IsKeyPressed(KeyboardKey.Tab)) displayGraph = !displayGraph;
 
-    if (Dirty) _graph = GridGraphConverter.ConvertGridToGraph(_grid);
+    if (Dirty) _graph = GGC.GridGraphConverter.ConvertGridToGraph(_grid);
   }
 
   private void ClearGrid()
   {
     _grid = _grid != null ?
-      new(_grid.Width, _grid.Height) :
-      new(10, 10);
+      new(_grid.Width, _grid.Height, _grid.LevelNum) :
+      new(10, 10, 0);
 
-    Gd.Grid = _grid;
-    _graph = GridGraphConverter.ConvertGridToGraph(_grid);
+    // Gd.Grid = _grid;
+    _graph = GGC.GridGraphConverter.ConvertGridToGraph(_grid);
     Debug.Print("Cleared");
   }
 
@@ -111,12 +114,12 @@ public class LevelEditor
   {
     if (File.Exists("grid.json"))
     {
-      Grid? newGrid = JsonSerializer.Deserialize<Grid>(File.ReadAllText(Filename));
+      GridLevel? newGrid = JsonSerializer.Deserialize<GridLevel>(File.ReadAllText(Filename));
       if (newGrid != null)
       {
         _grid = newGrid;
-        Gd.Grid = _grid;
-        _graph = GridGraphConverter.ConvertGridToGraph(_grid);
+        // Gd.Grid = _grid;
+        _graph = GGC.GridGraphConverter.ConvertGridToGraph(_grid);
         Debug.Print("Loaded");
       }
     }
@@ -143,7 +146,7 @@ public class LevelEditor
   {
     foreach (GridTile tile in SelectedTiles)
     {
-      Gd.DrawTile(tile, ThemeMarked);
+      Gd.DrawTile(tile, ThemeMarked, alwaysDrawFloor: true);
     }
   }
 
@@ -151,16 +154,17 @@ public class LevelEditor
   {
     if (HoveredTile == null) return;
 
-    Gd.DrawTile(HoveredTile, ThemeHovered);
+    Gd.DrawTile(HoveredTile, ThemeHovered, alwaysDrawFloor: true);
   }
 
   private void DisplayGraph()
   {
     foreach (WeightedEdge<GridTile> edge in _graph.GetAllEdges())
     {
-      (int x, int y)[] coords = [
-        (edge.From.Value.X, edge.From.Value.Y),
-        (edge.To.Value.X, edge.To.Value.Y),
+      (int x, int y, int level)[] coords = [
+        (edge.From.Value.X, edge.From.Value.Y, 0),
+        (edge.To.Value.X, edge.To.Value.Y, 0),
+
       ];
 
       Gd.DrawLine(coords, Color.Blue, 3, (from, to, thickness, color) =>

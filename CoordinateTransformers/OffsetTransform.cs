@@ -2,7 +2,7 @@ using System.Numerics;
 
 namespace CoordinateTransformers;
 
-public class OffsetTransform : CoordinateTransform
+public class OffsetTransform : ICoordinateTransform
 {
   public Vector2 Offset { get; set; }
 
@@ -11,28 +11,28 @@ public class OffsetTransform : CoordinateTransform
     return original += Offset;
   }
 
-  public Vector2[] Apply(Vector2[] originals)
-  {
-    Vector2[] modified = new Vector2[originals.Length];
-    for (int i = 0; i < originals.Length; i++)
-    {
-      modified[i] = originals[i] + Offset;
-    }
-    return modified;
-  }
+  // public Vector2[] Apply(Vector2[] originals)
+  // {
+  //   Vector2[] modified = new Vector2[originals.Length];
+  //   for (int i = 0; i < originals.Length; i++)
+  //   {
+  //     modified[i] = originals[i] + Offset;
+  //   }
+  //   return modified;
+  // }
 
   public Vector2 Reverse(Vector2 original)
   {
     return original -= Offset;
   }
 
-  public Vector2[] Reverse(Vector2[] originals)
-  {
-    Vector2[] modified = new Vector2[originals.Length];
-    for (int i = 0; i < originals.Length; i++)
-    {
-      modified[i] = originals[i] + Offset;
-    }
-    return modified;
-  }
+  // public Vector2[] Reverse(Vector2[] originals)
+  // {
+  //   Vector2[] modified = new Vector2[originals.Length];
+  //   for (int i = 0; i < originals.Length; i++)
+  //   {
+  //     modified[i] = originals[i] - Offset; // TODO: Why was this +?
+  //   }
+  //   return modified;
+  // }
 }

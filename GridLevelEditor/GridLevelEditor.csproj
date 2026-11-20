@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Libraries\WeightedGraph\WeightedGraph.csproj" />
+    <ProjectReference Include="..\..\Libraries\GridSystem\GridSystem.csproj" />
+    <ProjectReference Include="..\..\Libraries\RaylibExt\RaylibExt.csproj" />
+    <ProjectReference Include="..\GridRenderer\GridRenderer.csproj" />
+    <ProjectReference Include="..\GridGraphConverter\GridGraphConverter.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Raylib-cs" Version="8.1.0" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

@@ -2,7 +2,7 @@ using System.Numerics;
 
 namespace CoordinateTransformers;
 
-public class IsoTransform : CoordinateTransform
+public class IsoTransform : ICoordinateTransform
 {
   public float Ratio { get; set; }
 
