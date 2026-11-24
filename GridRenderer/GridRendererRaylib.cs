@@ -3,9 +3,10 @@ using GridSystem;
 using Raylib_cs;
 using RaylibExt;
 using CoordinateTransformers;
+using System.Diagnostics;
 
 namespace GridRenderer;
-
+// TODO: isometric Wall rendering (will require Z-ordering)
 // TODO: Extract all the Raylib/RaylibExt stuff
 public class GridRendererRaylib
 {
@@ -85,6 +86,7 @@ public class GridRendererRaylib
   }
 
   // -- TILE DRAWING
+  // TODO: Extract tile drawing into its own module
 
   #region tile drawing
 
@@ -149,6 +151,7 @@ public class GridRendererRaylib
   #endregion
 
   // -- GRID DRAWING
+  // TODO: Extract grid drawing into its own module
 
   #region grid drawing
 
@@ -275,6 +278,7 @@ public class GridRendererRaylib
   #endregion
 
   // -- PATHS AND LINE DRAWING
+  // TODO: Extract paths & lines drawing into its own module
 
   #region paths and lines
 
@@ -288,12 +292,10 @@ public class GridRendererRaylib
 
     for (int i = 0; i < pxCoords.Length - 1; i++)
     {
+      // Offset the lines a little, to allow for differentiation?
       Vector2 direction = Vector2.Normalize(pxCoords[i + 1] - pxCoords[i]);
       Vector2 start = pxCoords[i] + direction * distanceFromCenter;
       Vector2 end = pxCoords[i + 1] - direction * distanceFromCenter;
-
-      start = ApplyTransformers(start, coords[i].level);
-      end = ApplyTransformers(end, coords[i].level);
 
       drawAction(start, end, thickness, color);
     }
@@ -302,14 +304,16 @@ public class GridRendererRaylib
   #endregion
 
   // -- COORDINATE MANAGEMENT
+  // TODO: Extract coordinate management into its own module
+
   #region coordinates
 
   public Vector2 GetTileCenterPxCoords((int x, int y, int level) coord)
   {
-    return new Vector2(
+    return ApplyTransformers(new Vector2(
       coord.x * (GridTileSize + GridSpacingPx),
       coord.y * (GridTileSize + GridSpacingPx)
-    ) + FirstTileOffset + _halfSizeOffset;
+    ) + FirstTileOffset + _halfSizeOffset, coord.level);
   }
 
   public Vector2[] GetTileCenterPxCoords((int x, int y, int level)[] coords)
@@ -362,6 +366,7 @@ public class GridRendererRaylib
   #endregion
 
   // -- TRANSFORMERS
+  // TODO: Extract transformers into its own module
   #region transformers
 
   public Vector2 ApplyTransformers(Vector2 point, int levelNum)

@@ -2,8 +2,8 @@ using System.Numerics;
 using GridSystem;
 using Raylib_cs;
 
-namespace GridLevelEditor;
-
+namespace GridLevelEditor.States;
+//FIXME: Something broke walls…
 public class LevelEditorWallState(LevelEditor levelEditor) : LevelEditorState(levelEditor, "Wall edit")
 {
   private Vector2[]? _hoveredTileCorners = null;

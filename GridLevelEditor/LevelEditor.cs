@@ -6,6 +6,7 @@ using System.Diagnostics;
 using RaylibExt;
 using GridRenderer;
 using GGC = GridGraphConverter;
+using GridLevelEditor.States;
 
 namespace GridLevelEditor;
 
@@ -35,7 +36,7 @@ public class LevelEditor
     get; set
     {
       field = value;
-      _graph = GGC.GridGraphConverter.ConvertGridToGraph(value); // TODO: Multilevel
+      _graph = GGC.GridGraphConverter.ConvertGridToGraph(value);
     }
   }
   private WeightedGraph<GridTile>? _graph;
@@ -162,20 +163,16 @@ public class LevelEditor
     Gd.DrawTile(HoveredTile, ThemeHovered, alwaysDrawFloor: true);
   }
 
-  private void DrawGraph(GridLevel level)
+  private void DrawGraph(GridLevel level) // TODO: Separate graph drawing into its own module
   {
     if (!DisplayGraph || _graph == null) return;
-    Console.WriteLine(level.LevelNum);
 
     List<WeightedEdge<GridTile>> edges = _graph.GetAllEdges();
 
-    // var r = edges.Where(V => V.From.Value.GridLevel != V.To.Value.GridLevel);
-    // Console.WriteLine(r.Count());
-
     foreach (WeightedEdge<GridTile> edge in edges)
     {
-      if (edge.From.Value.GridLevel.LevelNum != level.LevelNum 
-        && edge.To.Value.GridLevel.LevelNum != level.LevelNum
+      if (edge.From.Value.GridLevel != level
+        && edge.To.Value.GridLevel != level
       )
       {
         continue;
@@ -183,7 +180,7 @@ public class LevelEditor
 
       (int x, int y, int level)[] coords = [
         (edge.From.Value.X, edge.From.Value.Y, edge.From.Value.GridLevel.LevelNum),
-        (edge.To.Value.X, edge.To.Value.Y, edge.From.Value.GridLevel.LevelNum)
+        (edge.To.Value.X, edge.To.Value.Y, edge.To.Value.GridLevel.LevelNum)
       ];
 
       Gd.DrawLine(coords, Color.Blue, 3, (from, to, thickness, color) =>

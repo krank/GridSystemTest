@@ -1,7 +1,7 @@
 using GridSystem;
 using Raylib_cs;
 
-namespace GridLevelEditor;
+namespace GridLevelEditor.States;
 
 public class LevelEditorTilesState(LevelEditor levelEditor) : LevelEditorState(levelEditor, "Tile edit")
 {
@@ -28,6 +28,8 @@ public class LevelEditorTilesState(LevelEditor levelEditor) : LevelEditorState(l
     if (Raylib.IsKeyPressed(KeyboardKey.F))
     {
       foreach (GridTile tile in _levelEditor.SelectedTiles) tile.HasFloor = !tile.HasFloor;
+      _levelEditor.SelectedTiles.Clear();
+      _levelEditor.Dirty = true;
     }
     if (Raylib.IsKeyPressed(KeyboardKey.D))
     {

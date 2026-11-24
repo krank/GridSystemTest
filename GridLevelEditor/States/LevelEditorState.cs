@@ -1,4 +1,4 @@
-namespace GridLevelEditor;
+namespace GridLevelEditor.States;
 
 // TODO: Make the IsoGridRendererRaylib a lot less specific
 public abstract class LevelEditorState(LevelEditor levelEditor, string name)

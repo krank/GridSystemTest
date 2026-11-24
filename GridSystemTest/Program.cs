@@ -42,8 +42,8 @@ int screenHeight = 900;
 Raylib.InitWindow(screenWidth, screenHeight, "Title");
 Raylib.SetTargetFPS(60);
 
-// Grid grid = new(5, 6, 5);
-Grid grid = new(2, 2, 2);
+Grid grid = new(5, 6, 3);
+// Grid grid = new(2, 2, 2);
 var graph = GridGraphConverter.GridGraphConverter.ConvertGridToGraph(grid);
 
 Camera2D camera = new()
