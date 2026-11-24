@@ -2,7 +2,6 @@ using GridSystem;
 using WeightedGraph;
 using Raylib_cs;
 using System.Numerics;
-using System.Text.Json;
 using System.Diagnostics;
 using RaylibExt;
 using GridRenderer;
@@ -14,24 +13,41 @@ public class LevelEditor
 {
   enum State { Walls, Tiles }
 
-  public bool Enabled { get; set; } = false;
-  public string Filename { get; set; } = "grid.json";
+  private bool _enabled = false;
+
+  public bool Enabled
+  {
+    get => _enabled;
+    set
+    {
+      _enabled = value;
+      if (_enabled) Gd.DrawLevelExtras += DrawGraph;
+      else Gd.DrawLevelExtras -= DrawGraph;
+    }
+  }
+
+  private readonly LevelEditorData levelEditorData;
 
   public bool Dirty { get; set; } = false;
 
-  private GridLevel _grid;
-  private WeightedGraph<GridTile> _graph;
+  public Grid Grid
+  {
+    get; set
+    {
+      field = value;
+      _graph = GGC.GridGraphConverter.ConvertGridToGraph(value); // TODO: Multilevel
+    }
+  }
+  private WeightedGraph<GridTile>? _graph;
   public GridRendererRaylib Gd { get; private set; }
 
-  private bool displayGraph = false;
+  public bool DisplayGraph { get; private set; } = false;
 
   public GridTile? HoveredTile { get; private set; }
 
   public Vector2 MousePosition { get; private set; }
 
-  private Dictionary<State, LevelEditorState> _states;
-
-  private LevelEditorState _state;
+  private readonly Dictionary<State, LevelEditorState> _states;
 
   public HashSet<GridTile> SelectedTiles { get; } = [];
 
@@ -48,11 +64,22 @@ public class LevelEditor
     Tile = new(255, 0, 0, 100)
   };
 
-  public LevelEditor(GridLevel grid, GridRendererRaylib gd)
+  public LevelEditorState CurrentState
   {
-    _grid = grid;
-    _graph = GGC.GridGraphConverter.ConvertGridToGraph(_grid);
+    private get => field;
+    set
+    {
+      if (field != null) field.ExitState();
+      field = value;
+      field.EnterState();
+    }
+  }
+
+  public LevelEditor(Grid grid, GridRendererRaylib gd)
+  {
+    Grid = grid;
     Gd = gd;
+    levelEditorData = new(this);
 
     _states = new()
     {
@@ -60,7 +87,7 @@ public class LevelEditor
       {State.Tiles, new LevelEditorTilesState(this)}
     };
 
-    _state = _states[State.Tiles];
+    CurrentState = _states[State.Tiles];
   }
 
   public void Update(Vector2 mPos)
@@ -70,101 +97,93 @@ public class LevelEditor
     MousePosition = mPos;
 
     HoveredTile = Gd.GetTileFromScreenPoint(mPos);
-    if (HoveredTile != null) _state.HandleHoveredTile();
+    if (HoveredTile != null) CurrentState.HandleHoveredTile();
 
-    _state.HandleMouseClicks(
+    CurrentState.HandleMouseClicks(
       Raylib.IsMouseButtonPressed(MouseButton.Left),
       Raylib.IsMouseButtonPressed(MouseButton.Right)
     );
 
-    _state.HandleKeys();
+    CurrentState.HandleKeys();
 
     if (Raylib.IsKeyDown(KeyboardKey.LeftControl))
     {
-      if (Raylib.IsKeyPressed(KeyboardKey.S)) SaveToFile();
-      if (Raylib.IsKeyPressed(KeyboardKey.L)) LoadFromFile();
+      if (Raylib.IsKeyPressed(KeyboardKey.S)) levelEditorData.SaveToFile();
+      if (Raylib.IsKeyPressed(KeyboardKey.L)) levelEditorData.LoadFromFile();
       if (Raylib.IsKeyPressed(KeyboardKey.N)) ClearGrid();
-      if (Raylib.IsKeyPressed(KeyboardKey.W)) _state = _states[State.Walls];
-      if (Raylib.IsKeyPressed(KeyboardKey.T)) _state = _states[State.Tiles];
+      if (Raylib.IsKeyPressed(KeyboardKey.W)) CurrentState = _states[State.Walls];
+      if (Raylib.IsKeyPressed(KeyboardKey.T)) CurrentState = _states[State.Tiles];
     }
 
-    if (Raylib.IsKeyPressed(KeyboardKey.Tab)) displayGraph = !displayGraph;
+    if (Raylib.IsKeyPressed(KeyboardKey.Tab)) DisplayGraph = !DisplayGraph;
 
-    if (Dirty) _graph = GGC.GridGraphConverter.ConvertGridToGraph(_grid);
+    if (Dirty) _graph = GGC.GridGraphConverter.ConvertGridToGraph(Grid);
   }
 
   private void ClearGrid()
   {
-    _grid = _grid != null ?
-      new(_grid.Width, _grid.Height, _grid.LevelNum) :
+    Grid = Grid != null ?
+      new(Grid.Width, Grid.Height, Grid.Levels.Length) :
       new(10, 10, 0);
 
-    // Gd.Grid = _grid;
-    _graph = GGC.GridGraphConverter.ConvertGridToGraph(_grid);
     Debug.Print("Cleared");
-  }
-
-  private void SaveToFile()
-  {
-    File.WriteAllText(Filename, JsonSerializer.Serialize(_grid));
-    Debug.Print("Saved");
-  }
-
-  private void LoadFromFile()
-  {
-    if (File.Exists("grid.json"))
-    {
-      GridLevel? newGrid = JsonSerializer.Deserialize<GridLevel>(File.ReadAllText(Filename));
-      if (newGrid != null)
-      {
-        _grid = newGrid;
-        // Gd.Grid = _grid;
-        _graph = GGC.GridGraphConverter.ConvertGridToGraph(_grid);
-        Debug.Print("Loaded");
-      }
-    }
   }
 
   public void DrawUI()
   {
     if (!Enabled) return;
     Raylib.DrawText("Edit mode on", 10, 0, Raylib.GetFontDefault().BaseSize * 3, Color.Black);
-    Raylib.DrawText($"{_state.Name}", 10, 40, Raylib.GetFontDefault().BaseSize * 3, Color.Gray);
-    _state.DrawUI();
+    Raylib.DrawText($"{CurrentState.Name}", 10, 40, Raylib.GetFontDefault().BaseSize * 3, Color.Gray);
+    CurrentState.DrawUI();
   }
 
   public void Draw()
   {
+    Console.WriteLine("-----");
     if (!Enabled) return;
 
-    _state.Draw();
-
-    if (displayGraph) DisplayGraph();
+    CurrentState.Draw();
   }
 
-  public void DrawSelected()
+  public void DrawSelected(GridLevel level)
   {
     foreach (GridTile tile in SelectedTiles)
     {
+      if (tile.GridLevel != level) continue;
       Gd.DrawTile(tile, ThemeMarked, alwaysDrawFloor: true);
     }
   }
 
-  public void DrawHovered()
+  public void DrawHovered(GridLevel level)
   {
     if (HoveredTile == null) return;
+    if (HoveredTile.GridLevel != level) return;
 
     Gd.DrawTile(HoveredTile, ThemeHovered, alwaysDrawFloor: true);
   }
 
-  private void DisplayGraph()
+  private void DrawGraph(GridLevel level)
   {
-    foreach (WeightedEdge<GridTile> edge in _graph.GetAllEdges())
-    {
-      (int x, int y, int level)[] coords = [
-        (edge.From.Value.X, edge.From.Value.Y, 0),
-        (edge.To.Value.X, edge.To.Value.Y, 0),
+    if (!DisplayGraph || _graph == null) return;
+    Console.WriteLine(level.LevelNum);
 
+    List<WeightedEdge<GridTile>> edges = _graph.GetAllEdges();
+
+    // var r = edges.Where(V => V.From.Value.GridLevel != V.To.Value.GridLevel);
+    // Console.WriteLine(r.Count());
+
+    foreach (WeightedEdge<GridTile> edge in edges)
+    {
+      if (edge.From.Value.GridLevel.LevelNum != level.LevelNum 
+        && edge.To.Value.GridLevel.LevelNum != level.LevelNum
+      )
+      {
+        continue;
+      }
+
+      (int x, int y, int level)[] coords = [
+        (edge.From.Value.X, edge.From.Value.Y, edge.From.Value.GridLevel.LevelNum),
+        (edge.To.Value.X, edge.To.Value.Y, edge.From.Value.GridLevel.LevelNum)
       ];
 
       Gd.DrawLine(coords, Color.Blue, 3, (from, to, thickness, color) =>

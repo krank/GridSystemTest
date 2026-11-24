@@ -7,20 +7,33 @@ using CoordinateTransformers;
 namespace GridRenderer;
 
 // TODO: Extract all the Raylib/RaylibExt stuff
-public class GridRendererRaylib(Grid grid)
+public class GridRendererRaylib
 {
-  public Grid Grid { get; set; } = grid;
-  public float GridTileSize { get; set; } = 32;
+  private Grid _grid;
 
-  private int _floorsToDisplay = grid.Levels.Length;
-  public int LevelsToDisplay
+  public Grid Grid
   {
-    get => _floorsToDisplay;
-    set => _floorsToDisplay = Math.Clamp(value, 1, Grid.Levels.Length);
+    get => _grid;
+    set
+    {
+      _grid = value;
+    }
   }
 
-  private float _floorColorLevelDifference = 0.25f / grid.Levels.Length;
+  public float GridTileSize { get; set; } = 32;
 
+  private int _levelsToDisplay;
+  public int LevelsToDisplay
+  {
+    get => _levelsToDisplay;
+    set => _levelsToDisplay = Math.Clamp(value, 1, Grid.Levels.Length);
+  }
+
+  private float _floorColorLevelDifference;
+
+  public Action<GridLevel> DrawLevelExtras = i => { };
+
+  // TODO: Extract visual stuff like sizes etc into a config class
   // -- Wall properties
   public float WallThickness { set; get; } = .1f;
 
@@ -45,6 +58,14 @@ public class GridRendererRaylib(Grid grid)
 
   // -- Cached vectors
   private readonly List<Vector2[]> _cacheBackgroundSpacingCorners = [];
+
+  public GridRendererRaylib(Grid grid)
+  {
+    Grid = grid;
+    LevelsToDisplay = grid.Levels.Length;
+    _floorColorLevelDifference = 0.25f / grid.Levels.Length;
+  }
+
 
   public void Recalculate()
   {
@@ -153,6 +174,8 @@ public class GridRendererRaylib(Grid grid)
           if (tile != null) DrawTile(tile, theme);
         }
       }
+
+      DrawLevelExtras(currentLevel);
 
     }
   }
@@ -269,10 +292,8 @@ public class GridRendererRaylib(Grid grid)
       Vector2 start = pxCoords[i] + direction * distanceFromCenter;
       Vector2 end = pxCoords[i + 1] - direction * distanceFromCenter;
 
-      start = Transformer.Apply(start);
-      end = Transformer.Apply(end);
-      start = OffsetTransformer.Apply(start);
-      end = OffsetTransformer.Apply(end);
+      start = ApplyTransformers(start, coords[i].level);
+      end = ApplyTransformers(end, coords[i].level);
 
       drawAction(start, end, thickness, color);
     }

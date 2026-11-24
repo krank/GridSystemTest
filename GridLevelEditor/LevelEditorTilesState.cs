@@ -5,13 +5,21 @@ namespace GridLevelEditor;
 
 public class LevelEditorTilesState(LevelEditor levelEditor) : LevelEditorState(levelEditor, "Tile edit")
 {
-  public override void Draw()
-  {
-    _levelEditor.DrawSelected();
-    _levelEditor.DrawHovered();
-  }
+  public override void Draw() { }
 
   public override void DrawUI() { }
+
+  public override void EnterState()
+  {
+    _levelEditor.Gd.DrawLevelExtras += _levelEditor.DrawHovered;
+    _levelEditor.Gd.DrawLevelExtras += _levelEditor.DrawSelected;
+  }
+
+  public override void ExitState()
+  {
+    _levelEditor.Gd.DrawLevelExtras -= _levelEditor.DrawHovered;
+    _levelEditor.Gd.DrawLevelExtras -= _levelEditor.DrawSelected;
+  }
 
   public override void HandleHoveredTile() { }
 

@@ -6,6 +6,9 @@ public abstract class LevelEditorState(LevelEditor levelEditor, string name)
   protected LevelEditor _levelEditor = levelEditor;
   public string Name { get; init; } = name;
 
+  public abstract void EnterState();
+  public abstract void ExitState();
+
   public abstract void DrawUI();
   public abstract void Draw();
 

@@ -4,7 +4,8 @@ using CoordinateTransformers;
 using Raylib_cs;
 using GridRenderer;
 using GridLevelEditor;
-
+using GridSystemTest;
+using Wacton.Unicolour;
 
 
 // https://www.youtube.com/watch?v=04oQ2jOUjkU
@@ -32,14 +33,18 @@ Problems for Future-me
 
 // TODO: Caching of all the various calculated points...?
 
-int screenWidth = 1024;
-int screenHeight = 768;
-float cameraSpeed = 150;
+// TODO: Implement Unicolours everywhere, as part of moving from hardcoded Raylib stuff in the renderer
+
+
+int screenWidth = 1280;
+int screenHeight = 900;
 
 Raylib.InitWindow(screenWidth, screenHeight, "Title");
 Raylib.SetTargetFPS(60);
 
-Grid grid = new(5, 6, 5);
+// Grid grid = new(5, 6, 5);
+Grid grid = new(2, 2, 2);
+var graph = GridGraphConverter.GridGraphConverter.ConvertGridToGraph(grid);
 
 Camera2D camera = new()
 {
@@ -48,6 +53,7 @@ Camera2D camera = new()
   Offset = Raylib.GetScreenCenter()
 };
 
+RaylibCameraControl cameraControl = new();
 
 GridRendererRaylib gd = new(grid)
 {
@@ -61,7 +67,7 @@ gd.Recalculate();
 
 ((OffsetTransform)gd.LevelOffsetTransformer).Offset = new(0, -96);
 
-LevelEditor levelEditor = new(grid.Levels[0], gd);
+LevelEditor levelEditor = new(grid, gd);
 
 Color bkg = Color.White;
 
@@ -69,20 +75,10 @@ while (!Raylib.WindowShouldClose())
 {
   float deltaTime = Raylib.GetFrameTime();
 
-  // TODO: Refactor into actions?
-  if (Raylib.IsKeyDown(KeyboardKey.Right)) camera.Offset.X -= cameraSpeed * deltaTime;
-  if (Raylib.IsKeyDown(KeyboardKey.Left)) camera.Offset.X += cameraSpeed * deltaTime;
-  if (Raylib.IsKeyDown(KeyboardKey.Up)) camera.Offset.Y += cameraSpeed * deltaTime;
-  if (Raylib.IsKeyDown(KeyboardKey.Down)) camera.Offset.Y -= cameraSpeed * deltaTime;
+  cameraControl.Update(ref camera, deltaTime);
 
   if (Raylib.GetMouseWheelMove() > 0) gd.LevelsToDisplay++;
   if (Raylib.GetMouseWheelMove() < 0) gd.LevelsToDisplay--;
-
-  if (Raylib.IsMouseButtonDown(MouseButton.Middle))
-  {
-    Vector2 mDelta = Raylib.GetMouseDelta();
-    camera.Offset += mDelta;
-  }
 
   Vector2 mPos = Raylib.GetScreenToWorld2D(Raylib.GetMousePosition(), camera);
 

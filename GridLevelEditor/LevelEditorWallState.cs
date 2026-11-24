@@ -10,11 +10,14 @@ public class LevelEditorWallState(LevelEditor levelEditor) : LevelEditorState(le
 
   Direction _localDirection;
 
-  public override void Draw()
+  public override void Draw() { }
+
+  public override void DrawUI() { }
+
+  public void DrawHoveredWalls(GridLevel level)
   {
     if (_levelEditor.HoveredTile == null) return;
-
-    _levelEditor.DrawHovered();
+    if (_levelEditor.HoveredTile.GridLevel != level) return;
 
     bool[] walls = new bool[4];
     walls[(int)_localDirection] = true;
@@ -25,9 +28,16 @@ public class LevelEditorWallState(LevelEditor levelEditor) : LevelEditorState(le
     }
   }
 
-  public override void DrawUI()
+  public override void EnterState()
   {
+    _levelEditor.Gd.DrawLevelExtras += _levelEditor.DrawHovered;
+    _levelEditor.Gd.DrawLevelExtras += DrawHoveredWalls;
+  }
 
+  public override void ExitState()
+  {
+    _levelEditor.Gd.DrawLevelExtras -= _levelEditor.DrawHovered;
+    _levelEditor.Gd.DrawLevelExtras -= DrawHoveredWalls;
   }
 
   public override void HandleHoveredTile()
