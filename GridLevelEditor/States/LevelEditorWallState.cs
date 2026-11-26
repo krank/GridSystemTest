@@ -3,7 +3,6 @@ using GridSystem;
 using Raylib_cs;
 
 namespace GridLevelEditor.States;
-//FIXME: Something broke walls…
 public class LevelEditorWallState(LevelEditor levelEditor) : LevelEditorState(levelEditor, "Wall edit")
 {
   private Vector2[]? _hoveredTileCorners = null;
@@ -49,13 +48,15 @@ public class LevelEditorWallState(LevelEditor levelEditor) : LevelEditorState(le
 
     if (_hoveredTileCorners != null)
     {
+      // Get raw (untransformed) center-coords
+      Vector2 centerPxCoords = _levelEditor.Gd.GetTileCenterPxCoords(
+          (_levelEditor.HoveredTile.X, _levelEditor.HoveredTile.Y, 0)
+        );
+      // Untransform mouse position to get it into the same frame of reference
       Vector2 mPos = _levelEditor.Gd.ReverseTransformers(_levelEditor.MousePosition, _levelEditor.HoveredTile.GridLevel.LevelNum);
 
-      // TODO: For the love of god clean this up
       _localDirection = _levelEditor.Gd.GetLocalTileDirectionOfScreenPoint(
-        _levelEditor.Gd.GetTileCenterPxCoords(
-          (_levelEditor.HoveredTile.X, _levelEditor.HoveredTile.Y, 0)
-        ),
+        centerPxCoords,
         mPos
       );
     }

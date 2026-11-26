@@ -25,14 +25,4 @@ public class OffsetTransform : ICoordinateTransform
   {
     return original -= Offset;
   }
-
-  // public Vector2[] Reverse(Vector2[] originals)
-  // {
-  //   Vector2[] modified = new Vector2[originals.Length];
-  //   for (int i = 0; i < originals.Length; i++)
-  //   {
-  //     modified[i] = originals[i] - Offset; // TODO: Why was this +?
-  //   }
-  //   return modified;
-  // }
 }

@@ -10,14 +10,13 @@ namespace GridRenderer;
 // TODO: Extract all the Raylib/RaylibExt stuff
 public class GridRendererRaylib
 {
-  private Grid _grid;
 
   public Grid Grid
   {
-    get => _grid;
+    get => field;
     set
     {
-      _grid = value;
+      field = value;
     }
   }
 
@@ -183,10 +182,11 @@ public class GridRendererRaylib
     }
   }
 
+  // TODO: Move background mesh drawing to new module?
   private void CalculateBackgroundSpacingCorners()
   {
     // TODO: Add level awareness; different caches for each level
-    Vector2[] corners = GetCorners(0);
+    Vector2[] corners = ApplyTransformers(GetCorners(0), 0);
     _cacheBackgroundSpacingCorners.Clear();
 
     Vector2 spacingOffsetV = Transformer.Apply(new Vector2(0, GridSpacingPx));
@@ -271,7 +271,7 @@ public class GridRendererRaylib
       new(0, size.Y)
     ];
 
-    corners = ApplyTransformers(corners, levelNum);
+    // corners = ApplyTransformers(corners, levelNum);
     return corners;
   }
 
@@ -288,7 +288,13 @@ public class GridRendererRaylib
     Action<Vector2, Vector2, float, Color> drawAction,
     float distanceFromCenter = 10)
   {
-    Vector2[] pxCoords = GetTileCenterPxCoords(coords);
+    Vector2[] pxCoords = new Vector2[coords.Length];
+    for (int i = 0; i < coords.Length; i++)
+    {
+      pxCoords[i] = ApplyTransformers(GetTileCenterPxCoords(coords[i]), coords[i].level);
+    }
+
+    //  GetTileCenterPxCoords(coords);
 
     for (int i = 0; i < pxCoords.Length - 1; i++)
     {
@@ -310,18 +316,11 @@ public class GridRendererRaylib
 
   public Vector2 GetTileCenterPxCoords((int x, int y, int level) coord)
   {
-    return ApplyTransformers(new Vector2(
+    return new Vector2(
       coord.x * (GridTileSize + GridSpacingPx),
       coord.y * (GridTileSize + GridSpacingPx)
-    ) + FirstTileOffset + _halfSizeOffset, coord.level);
+    ) + FirstTileOffset + _halfSizeOffset;
   }
-
-  public Vector2[] GetTileCenterPxCoords((int x, int y, int level)[] coords)
-  {
-    return [.. coords.Select(coord => GetTileCenterPxCoords(coord))];
-  }
-
-  public Vector2[] GetTileCenterPxCoords(int levelNum) => GetTileCenterPxCoords(Grid.Levels[levelNum].GetAllCoords(levelNum));
 
   public (int x, int y)? GetCoordFromScreenPoint(Vector2 screenPoint, int level)
   {
@@ -449,7 +448,18 @@ public class GridRendererRaylib
   public void CenterOnScreen()
   {
     Vector2 centerpoint = Raylib.GetScreenCenter();
-    Rectangle r = Rect.GetRectangleFromPoints(GetCorners(0));
+    // TODO: Get a big rectangle that contains all floors
+
+    List<Vector2> allCorners = [];
+
+    for (int i = 0; i < Grid.Levels.Length; i++)
+    {
+      allCorners.Append(GetCorners(0));
+    }
+
+    Rectangle r = Rect.GetRectangleFromPoints(
+      ApplyTransformers(GetCorners(0), 0)
+      );
     if (OffsetTransformer is not OffsetTransform) return;
 
     ((OffsetTransform)OffsetTransformer).Offset = centerpoint - r.Center;

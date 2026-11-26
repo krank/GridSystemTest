@@ -140,7 +140,6 @@ public class LevelEditor
 
   public void Draw()
   {
-    Console.WriteLine("-----");
     if (!Enabled) return;
 
     CurrentState.Draw();

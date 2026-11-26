@@ -7,7 +7,6 @@ using GridLevelEditor;
 using GridSystemTest;
 using Wacton.Unicolour;
 
-
 // https://www.youtube.com/watch?v=04oQ2jOUjkU
 // https://medium.com/@kavierim/demystifying-isometric-projection-in-2d-games-with-python-bbcc2038a620
 
@@ -42,9 +41,8 @@ int screenHeight = 900;
 Raylib.InitWindow(screenWidth, screenHeight, "Title");
 Raylib.SetTargetFPS(60);
 
-Grid grid = new(5, 6, 3);
+Grid grid = new(5, 6, 4);
 // Grid grid = new(2, 2, 2);
-var graph = GridGraphConverter.GridGraphConverter.ConvertGridToGraph(grid);
 
 Camera2D camera = new()
 {
@@ -59,17 +57,19 @@ GridRendererRaylib gd = new(grid)
 {
   GridTileSize = 64,
   GridSpacing = .05f,
-  Transformer = new IsoTransform() { Ratio = .5f }
+  Transformer = new IsoTransform() { Ratio = .5f },
+  // Transformer = new DummyTransformer(),
+  LevelOffsetTransformer = new OffsetTransform() { Offset = new(0, -96f) }
 };
 
 gd.CenterOnScreen();
 gd.Recalculate();
 
-((OffsetTransform)gd.LevelOffsetTransformer).Offset = new(0, -96);
-
 LevelEditor levelEditor = new(grid, gd);
 
 Color bkg = Color.White;
+
+Texture2D bkgTexture = GenerateBackground(screenWidth, screenHeight);
 
 while (!Raylib.WindowShouldClose())
 {
@@ -91,6 +91,9 @@ while (!Raylib.WindowShouldClose())
 
   Raylib.BeginDrawing();
   Raylib.ClearBackground(bkg);
+  Raylib.DrawTexture(bkgTexture, 0, 0, Color.White);
+
+
 
   Raylib.BeginMode2D(camera);
   gd.DrawGrid();
@@ -101,4 +104,35 @@ while (!Raylib.WindowShouldClose())
   levelEditor.DrawUI();
 
   Raylib.EndDrawing();
+}
+
+
+
+
+
+
+
+static Texture2D GenerateBackground(int screenWidth, int screenHeight)
+{
+  Color bkgColor = new(250, 250, 250);
+  Color pen = new(230, 230, 230);
+  Image tile = Raylib.GenImageColor(64, 64, bkgColor);
+  Raylib.ImageDrawLine(ref tile, 0, 8, 17, 8, pen);
+  Raylib.ImageDrawLine(ref tile, 8, 0, 8, 17, pen);
+
+
+
+  Image bkg = Raylib.GenImageColor(screenWidth, screenHeight, Color.RayWhite);
+  Rectangle src = new(Vector2.Zero, tile.Dimensions);
+  Rectangle dst = new(Vector2.Zero, tile.Dimensions);
+
+  for (dst.X = 0; dst.X < bkg.Width; dst.X += dst.Width)
+  {
+    for (dst.Y = 0; dst.Y < bkg.Height; dst.Y += dst.Height)
+    {
+      Raylib.ImageDraw(ref bkg, tile, src, dst, Color.White);
+    }
+  }
+
+  return Raylib.LoadTextureFromImage(bkg);
 }
