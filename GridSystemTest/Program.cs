@@ -41,8 +41,8 @@ int screenHeight = 900;
 Raylib.InitWindow(screenWidth, screenHeight, "Title");
 Raylib.SetTargetFPS(60);
 
-Grid grid = new(5, 6, 4);
-// Grid grid = new(2, 2, 2);
+// Grid grid = new(5, 6, 6);
+Grid grid = new(2, 2, 1);
 
 Camera2D camera = new()
 {
@@ -55,14 +55,17 @@ RaylibCameraControl cameraControl = new();
 
 GridRendererRaylib gd = new(grid)
 {
-  GridTileSize = 64,
-  GridSpacing = .05f,
-  Transformer = new IsoTransform() { Ratio = .5f },
-  // Transformer = new DummyTransformer(),
+  LayoutSettings = new()
+  {
+    GridTileSize = 64,
+    GridSpacing = .5f
+  },
+  // Transformer = new IsoTransform() { Ratio = .5f },
+  Transformer = new DummyTransformer(),
   LevelOffsetTransformer = new OffsetTransform() { Offset = new(0, -96f) }
 };
 
-gd.CenterOnScreen();
+// gd.CenterOnScreen();
 gd.Recalculate();
 
 LevelEditor levelEditor = new(grid, gd);

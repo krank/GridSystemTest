@@ -23,7 +23,7 @@ public class LevelEditorWallState(LevelEditor levelEditor) : LevelEditorState(le
     if (_hoveredTileCorners != null)
     {
       // TODO: Get rid of specifying color as raylib format
-      _levelEditor.Gd.DrawWalls(walls, _hoveredTileCorners, Color.Blue);
+      _levelEditor.Gd.TileRenderer.DrawWalls(walls, _hoveredTileCorners, Color.Blue);
     }
   }
 
@@ -42,14 +42,14 @@ public class LevelEditorWallState(LevelEditor levelEditor) : LevelEditorState(le
   public override void HandleHoveredTile()
   {
     if (_levelEditor.HoveredTile == null) return;
-    _hoveredTileCorners = _levelEditor.Gd.GetTileCorners(_levelEditor.HoveredTile);
+    _hoveredTileCorners = _levelEditor.Gd.LayoutSettings.GetTileCorners(_levelEditor.HoveredTile);
 
     _hoveredTileCorners = _levelEditor.Gd.ApplyTransformers(_hoveredTileCorners, _levelEditor.HoveredTile.GridLevel.LevelNum);
 
     if (_hoveredTileCorners != null)
     {
       // Get raw (untransformed) center-coords
-      Vector2 centerPxCoords = _levelEditor.Gd.GetTileCenterPxCoords(
+      Vector2 centerPxCoords = _levelEditor.Gd.LayoutSettings.GetTileCenterPxCoords(
           (_levelEditor.HoveredTile.X, _levelEditor.HoveredTile.Y, 0)
         );
       // Untransform mouse position to get it into the same frame of reference

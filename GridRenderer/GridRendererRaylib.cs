@@ -10,46 +10,26 @@ namespace GridRenderer;
 // TODO: Extract all the Raylib/RaylibExt stuff
 public class GridRendererRaylib
 {
+  public Grid Grid { get; set; }
 
-  public Grid Grid
-  {
-    get => field;
-    set
-    {
-      field = value;
-    }
-  }
-
-  public float GridTileSize { get; set; } = 32;
-
-  private int _levelsToDisplay;
   public int LevelsToDisplay
   {
-    get => _levelsToDisplay;
-    set => _levelsToDisplay = Math.Clamp(value, 1, Grid.Levels.Length);
+    get; set => field = Math.Clamp(value, 1, Grid.Levels.Length);
   }
 
-  private float _floorColorLevelDifference;
+  public float FloorColorLevelDifference;
 
   public Action<GridLevel> DrawLevelExtras = i => { };
 
-  // TODO: Extract visual stuff like sizes etc into a config class
+  public TileRenderer TileRenderer { get; private set; }
+  public LevelMeshRenderer LevelMeshRenderer { get; private set; }
+
   // -- Wall properties
-  public float WallThickness { set; get; } = .1f;
-
-  private float WallThicknessPx { get => WallThickness * GridTileSize; }
   public bool IncludeWalls = true;
-  private Vector2[] _innerRectCornerOffsets = [];
-  private Vector2 _halfSizeOffset = Vector2.Zero;
-
-  // -- Grid spacing properties
-  public float GridSpacing { get; set; } = .1f;
-  private float GridSpacingPx { get => GridSpacing * GridTileSize; }
-  public Vector2 FirstTileOffset => Vector2.One * GridSpacingPx / 2;
 
   // -- Font & theme properties
-  private float FontSize { get => GridTileSize / 2; }
-  public GridTheme DefaultTheme { get; set; } = new();
+  public GridColorTheme DefaultTheme { get; set; } = new();
+  public GridLayoutSettings LayoutSettings { get; set; } = new();
 
   // -- Coordinate transformers
   public ICoordinateTransform Transformer { get; set; } = new DummyTransformer();
@@ -57,97 +37,24 @@ public class GridRendererRaylib
   public ICoordinateTransform LevelOffsetTransformer { get; set; } = new OffsetTransform() { Offset = new Vector2(0, -100) };
 
   // -- Cached vectors
-  private readonly List<Vector2[]> _cacheBackgroundSpacingCorners = [];
+  public readonly List<Vector2[]> CacheBackgroundSpacingCorners = [];
 
   public GridRendererRaylib(Grid grid)
   {
     Grid = grid;
     LevelsToDisplay = grid.Levels.Length;
-    _floorColorLevelDifference = 0.25f / grid.Levels.Length;
+    FloorColorLevelDifference = 0.25f / grid.Levels.Length;
+
+    TileRenderer = new(this);
+    LevelMeshRenderer = new(this);
   }
 
 
   public void Recalculate()
   {
-    CalculateBackgroundSpacingCorners();
-
-    _innerRectCornerOffsets = [
-      new Vector2(WallThicknessPx),
-      new Vector2(-WallThicknessPx, WallThicknessPx),
-      new Vector2(-WallThicknessPx, -WallThicknessPx),
-      new Vector2(WallThicknessPx, -WallThicknessPx),
-    ];
-
-    _innerRectCornerOffsets = Transformer.Apply(_innerRectCornerOffsets);
-
-    _halfSizeOffset = Vector2.One * GridTileSize / 2;
-
+    LevelMeshRenderer.Recalculate();
+    TileRenderer.Recalculate();
   }
-
-  // -- TILE DRAWING
-  // TODO: Extract tile drawing into its own module
-
-  #region tile drawing
-
-  public void DrawTile(GridTile tile) => DrawTile(tile, DefaultTheme);
-  public void DrawTile(GridTile tile, string text) => DrawTile(tile, DefaultTheme, text);
-
-  public void DrawTile(GridTile tile, GridTheme theme, string text = "", bool alwaysDrawFloor = false)
-  {
-    Vector2[] corners = GetTileCorners(tile);
-    corners = ApplyTransformers(corners, tile.GridLevel.LevelNum);
-
-    // TODO: Change order of blocker/directions to be counterclockwise, to avoid needing to reverse?
-    if (tile.HasFloor || alwaysDrawFloor)
-    {
-      Raylib.DrawTriangleFan([.. corners.Reverse()], 4, ColorUtil.Brighten(theme.Tile, 1 + _floorColorLevelDifference * tile.GridLevel.LevelNum));
-    }
-
-    if (IncludeWalls)
-    {
-      DrawWalls(tile.Blocking, corners, Color.Black);
-    }
-
-    // -- TEXT?
-    if (text.Length > 0)
-    {
-      Rectangle rect = Rect.GetRectangleFromPoints(corners);
-      Vector2 textSize = Raylib.MeasureTextEx(Raylib.GetFontDefault(), text, FontSize, FontSize / 16);
-      Vector2 textPos = rect.Center - textSize / 2;
-
-      Raylib.DrawTextEx(
-        Raylib.GetFontDefault(),
-        text,
-        textPos,
-        FontSize, FontSize / 16, theme.Text
-      );
-    }
-  }
-
-  public void DrawWalls(bool[] directions, Vector2[] corners, Color color)
-  {
-    Vector2[] innerCorners = new Vector2[corners.Length];
-    for (int i = 0; i < corners.Length; i++)
-    {
-      innerCorners[i] = corners[i] + _innerRectCornerOffsets[i];
-    }
-
-    // -- Walls
-    for (int i = 0; i < directions.Length; i++) // Go through all four directions
-    {
-      if (!directions[i]) continue;
-
-      int nxt = (i + 1) % directions.Length;
-      Raylib.DrawTriangleFan([
-        innerCorners[nxt],
-        corners[nxt],
-        corners[i],
-        innerCorners[i],
-      ], 4, color);
-    }
-  }
-
-  #endregion
 
   // -- GRID DRAWING
   // TODO: Extract grid drawing into its own module
@@ -155,124 +62,30 @@ public class GridRendererRaylib
   #region grid drawing
 
   public void DrawGrid() => DrawGrid([], DefaultTheme);
-  public void DrawGrid(GridTheme theme) => DrawGrid([], theme);
+  public void DrawGrid(GridColorTheme theme) => DrawGrid([], theme);
   public void DrawGrid(List<(int x, int y, int level)> includedCoords) => DrawGrid(includedCoords, DefaultTheme);
 
-  public void DrawGrid(List<(int x, int y, int level)> includedCoords, GridTheme theme)
+  public void DrawGrid(List<(int x, int y, int level)> includedCoords, GridColorTheme theme)
   {
     for (int levelNum = 0; levelNum < LevelsToDisplay; levelNum++)
     {
-      DrawBackgroundMesh(theme.Background, levelNum);
+      LevelMeshRenderer.Draw(Color.Green, levelNum);
       GridLevel currentLevel = Grid.GetLevel(levelNum);
 
       for (int y = 0; y < Grid.Height; y++)
       {
         for (int x = 0; x < Grid.Width; x++)
         {
-          // TODO: IncludeCoords needs level awareness
           if (!includedCoords.Contains((x, y, levelNum)) && includedCoords.Count > 0) continue;
 
           GridTile? tile = currentLevel.Get(x, y);
-          if (tile != null) DrawTile(tile, theme);
+          // if (tile != null) TileRenderer.DrawTile(tile, theme);
         }
       }
 
       DrawLevelExtras(currentLevel);
 
     }
-  }
-
-  // TODO: Move background mesh drawing to new module?
-  private void CalculateBackgroundSpacingCorners()
-  {
-    // TODO: Add level awareness; different caches for each level
-    Vector2[] corners = ApplyTransformers(GetCorners(0), 0);
-    _cacheBackgroundSpacingCorners.Clear();
-
-    Vector2 spacingOffsetV = Transformer.Apply(new Vector2(0, GridSpacingPx));
-    Vector2 tileOffsetV = Transformer.Apply(new Vector2(0, GridTileSize));
-    Vector2 spacingOffsetH = Transformer.Apply(new Vector2(GridSpacingPx, 0));
-    Vector2 tileOffsetH = Transformer.Apply(new Vector2(GridTileSize, 0));
-
-    // Initial corners for Vertical
-    Vector2[] crn = [corners[0], corners[1],
-      corners[1] + spacingOffsetV / 2,
-      corners[0] + spacingOffsetV / 2
-    ];
-
-    _cacheBackgroundSpacingCorners.Add([.. crn.Reverse()]);
-
-    for (int i = 0; i < 2; i++) crn[i] -= spacingOffsetV / 2;
-
-    for (int y = 0; y < Grid.Height; y++)
-    {
-      // Move all corners one step
-      for (int i = 0; i < 4; i++) crn[i] += tileOffsetV + spacingOffsetV;
-      // Decrease the distance between corners for the last line
-      if (y == Grid.Height - 1)
-      {
-        for (int i = 2; i < 4; i++) crn[i] -= spacingOffsetV / 2;
-      }
-
-      _cacheBackgroundSpacingCorners.Add([.. crn.Reverse()]);
-    }
-
-    crn = [
-      corners[0],
-      corners[0] + spacingOffsetH / 2,
-      corners[3] + spacingOffsetH / 2,
-      corners[3]
-    ];
-
-    _cacheBackgroundSpacingCorners.Add([.. crn.Reverse()]);
-    crn[0] -= spacingOffsetH / 2;
-    crn[3] -= spacingOffsetH / 2;
-
-    for (int x = 0; x < Grid.Width; x++)
-    {
-      // Move all corners one step
-      for (int i = 0; i < 4; i++) crn[i] += tileOffsetH + spacingOffsetH;
-      // Decrease the distance between corners for the last line
-      if (x == Grid.Width - 1)
-      {
-        crn[1] -= spacingOffsetH / 2;
-        crn[2] -= spacingOffsetH / 2;
-      }
-
-      _cacheBackgroundSpacingCorners.Add([.. crn.Reverse()]);
-    }
-
-  }
-
-  private void DrawBackgroundMesh(Color color, int level)
-  {
-    color = ColorUtil.Brighten(color, 1 + (level * 0.1f));
-    List<Vector2[]> localCornerGroups = [.. _cacheBackgroundSpacingCorners];
-
-    for (int i = 0; i < localCornerGroups.Count; i++)
-    {
-      localCornerGroups[i] = LevelOffsetTransformer.Apply(localCornerGroups[i], level);
-    }
-
-    foreach (Vector2[] crn in localCornerGroups)
-    {
-      Raylib.DrawTriangleFan(crn, crn.Length, color);
-    }
-  }
-
-  public Vector2[] GetCorners(int levelNum)
-  {
-    Vector2 size = GetPxSize();
-
-    Vector2[] corners = [ // clockwise
-      Vector2.Zero,
-      new(size.X, 0),
-      new(size.X, size.Y),
-      new(0, size.Y)
-    ];
-
-    // corners = ApplyTransformers(corners, levelNum);
-    return corners;
   }
 
   #endregion
@@ -291,10 +104,8 @@ public class GridRendererRaylib
     Vector2[] pxCoords = new Vector2[coords.Length];
     for (int i = 0; i < coords.Length; i++)
     {
-      pxCoords[i] = ApplyTransformers(GetTileCenterPxCoords(coords[i]), coords[i].level);
+      pxCoords[i] = ApplyTransformers(LayoutSettings.GetTileCenterPxCoords(coords[i]), coords[i].level);
     }
-
-    //  GetTileCenterPxCoords(coords);
 
     for (int i = 0; i < pxCoords.Length - 1; i++)
     {
@@ -314,19 +125,13 @@ public class GridRendererRaylib
 
   #region coordinates
 
-  public Vector2 GetTileCenterPxCoords((int x, int y, int level) coord)
-  {
-    return new Vector2(
-      coord.x * (GridTileSize + GridSpacingPx),
-      coord.y * (GridTileSize + GridSpacingPx)
-    ) + FirstTileOffset + _halfSizeOffset;
-  }
+
 
   public (int x, int y)? GetCoordFromScreenPoint(Vector2 screenPoint, int level)
   {
     screenPoint = ReverseTransformers(screenPoint, level);
 
-    screenPoint /= GridTileSize + GridSpacingPx;
+    screenPoint /= LayoutSettings.GridTileSizeWithSpacing;
 
     if (
       screenPoint.X >= Grid.Width || screenPoint.Y >= Grid.Height
@@ -347,19 +152,6 @@ public class GridRendererRaylib
     }
 
     return null;
-  }
-
-  public Vector2? GetTileLocalPxCoords(Vector2 screenPoint, bool constrain = true)
-  {
-    screenPoint -= FirstTileOffset;
-    if (screenPoint.X < 0 || screenPoint.Y < 0) return constrain ? Vector2.Zero : null;
-
-    float localX = screenPoint.X % (GridTileSize + GridSpacingPx);
-    float localY = screenPoint.Y % (GridTileSize + GridSpacingPx);
-
-    if (localY > GridTileSize || localX > GridTileSize) return constrain ? new(GridTileSize) : null;
-
-    return new(localX, localY);
   }
 
   #endregion
@@ -405,27 +197,28 @@ public class GridRendererRaylib
   // -- UTIL
 
   #region util
-  public Vector2 GetPxSize() => new(
-    Grid.Width * (GridTileSize + GridSpacingPx),
-    Grid.Height * (GridTileSize + GridSpacingPx)
-  );
 
-  public Vector2[] GetTileCorners(GridTile tile)
+  public Vector2[] GetCorners(int levelNum)
   {
-    float left = tile.X * GridTileSize + tile.X * GridSpacingPx + FirstTileOffset.X;
-    float top = tile.Y * GridTileSize + tile.Y * GridSpacingPx + FirstTileOffset.Y;
-    float right = left + GridTileSize;
-    float bottom = top + GridTileSize;
+    Vector2 size = GetPxSize();
 
-    return [ // COUNTERCLOCKWISE
-      new(left, top),
-      new(right, top),
-      new(right, bottom),
-      new(left, bottom),
+    Vector2[] corners = [ // clockwise
+      Vector2.Zero,
+      new(size.X, 0),
+      new(size.X, size.Y),
+      new(0, size.Y)
     ];
+
+    return corners;
   }
 
+  public Vector2 GetPxSize() => new(
+    Grid.Width * LayoutSettings.GridTileSizeWithSpacing,
+    Grid.Height * LayoutSettings.GridTileSizeWithSpacing
+  );
+
   // TODO Better name?
+  // TODO Also maybe extract to Direction module?
   public Direction GetLocalTileDirectionOfScreenPoint(Vector2 tileCenterPoint, Vector2 screenPoint)
   {
     Vector2 diff = tileCenterPoint - screenPoint;
@@ -448,30 +241,19 @@ public class GridRendererRaylib
   public void CenterOnScreen()
   {
     Vector2 centerpoint = Raylib.GetScreenCenter();
-    // TODO: Get a big rectangle that contains all floors
 
-    List<Vector2> allCorners = [];
+    Vector2[] allCorners = [];
 
     for (int i = 0; i < Grid.Levels.Length; i++)
     {
-      allCorners.Append(GetCorners(0));
+      allCorners = [.. allCorners, .. ApplyTransformers(GetCorners(i), i)];
     }
 
-    Rectangle r = Rect.GetRectangleFromPoints(
-      ApplyTransformers(GetCorners(0), 0)
-      );
+    Rectangle r = Rect.GetRectangleFromPoints(allCorners);
+
     if (OffsetTransformer is not OffsetTransform) return;
 
     ((OffsetTransform)OffsetTransformer).Offset = centerpoint - r.Center;
   }
 
-  // -- NESTED CLASSES
-
-  public class GridTheme
-  {
-    public Color Background { get; set; } = new(210, 210, 210);
-    public Color Wall { get; set; } = Color.Black;
-    public Color Tile { get; set; } = Color.LightGray;
-    public Color Text { get; set; } = Color.Black;
-  }
 }

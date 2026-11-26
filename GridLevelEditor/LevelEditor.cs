@@ -41,6 +41,7 @@ public class LevelEditor
   }
   private WeightedGraph<GridTile>? _graph;
   public GridRendererRaylib Gd { get; private set; }
+  private TileRenderer _tileRenderer;
 
   public bool DisplayGraph { get; private set; } = false;
 
@@ -52,13 +53,13 @@ public class LevelEditor
 
   public HashSet<GridTile> SelectedTiles { get; } = [];
 
-  public GridRendererRaylib.GridTheme ThemeHovered { get; private set; } = new()
+  public GridColorTheme ThemeHovered { get; private set; } = new()
   {
     Background = Color.Blank,
     Wall = Color.Blank,
     Tile = new(0, 0, 255, 16)
   };
-  public GridRendererRaylib.GridTheme ThemeMarked { get; private set; } = new()
+  public GridColorTheme ThemeMarked { get; private set; } = new()
   {
     Background = Color.Blank,
     Wall = Color.Blank,
@@ -80,6 +81,7 @@ public class LevelEditor
   {
     Grid = grid;
     Gd = gd;
+    _tileRenderer = Gd.TileRenderer;
     levelEditorData = new(this);
 
     _states = new()
@@ -150,7 +152,7 @@ public class LevelEditor
     foreach (GridTile tile in SelectedTiles)
     {
       if (tile.GridLevel != level) continue;
-      Gd.DrawTile(tile, ThemeMarked, alwaysDrawFloor: true);
+      _tileRenderer.DrawTile(tile, ThemeMarked, alwaysDrawFloor: true);
     }
   }
 
@@ -159,7 +161,7 @@ public class LevelEditor
     if (HoveredTile == null) return;
     if (HoveredTile.GridLevel != level) return;
 
-    Gd.DrawTile(HoveredTile, ThemeHovered, alwaysDrawFloor: true);
+    _tileRenderer.DrawTile(HoveredTile, ThemeHovered, alwaysDrawFloor: true);
   }
 
   private void DrawGraph(GridLevel level) // TODO: Separate graph drawing into its own module
